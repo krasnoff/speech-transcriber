@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -16,12 +16,15 @@ import {
 
 export default function Index() {
   const router = useRouter();
+  const transcriptScrollRef = useRef<ScrollView>(null);
   const [isMicPushed, setIsMicPushed] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   
   const [recognizing, setRecognizing] = useState(false);
-  const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
+
+  const initialText = "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי.";
+  const [transcript, setTranscript] = useState(initialText);
 
   const increaseRecordingTime = () => {
     setRecordingTime((prev) => prev + 1);
@@ -39,6 +42,10 @@ export default function Index() {
     return `${hours}:${minutes}:${seconds}`;
   };
 
+  const scrollTranscriptToBottom = () => {
+    transcriptScrollRef.current?.scrollToEnd({ animated: true });
+  };
+
   useEffect(() => {
     const checkPermissionsOnLoad = async () => {
       const hasPermissions = await hasRequiredPermissions();
@@ -52,11 +59,16 @@ export default function Index() {
   }, [router]);
 
   useEffect(() => {
+    scrollTranscriptToBottom();
+  }, [transcript, interimTranscript]);
+
+  useEffect(() => {
     if (!isMicPushed) {
       return;
     }
 
     let intervalId: ReturnType<typeof setInterval> | undefined;
+    setTranscript("");
 
     const startRecordingSession = async () => {
       const hasPermissions = await hasRequiredPermissions();
@@ -97,15 +109,17 @@ export default function Index() {
       .join("");
 
     if (event.isFinal) {
-      setTranscript((prev) => prev + text + " ");
+      // console.log("Final transcript:", text);
+      setTranscript((prev) => prev + "\n" + text);
       setInterimTranscript("");
     } else {
+      //console.log("Interim transcript:", text);
       setInterimTranscript(text);
     }
   });
 
   useSpeechRecognitionEvent("error", (event) => {
-    console.log("Speech recognition error:", event);
+    // console.log("Speech recognition error:", event);
     setRecognizing(false);
     Alert.alert("Speech recognition error", event.message);
   });
@@ -127,8 +141,10 @@ export default function Index() {
   };
 
   const clearText = () => {
-    setTranscript("");
+    setTranscript(initialText);
     setInterimTranscript("");
+    setRecordingTime(0);
+    setIsMicPushed(false);
   };
 
   return (
@@ -166,10 +182,21 @@ export default function Index() {
             />
             <Text style={styles.title2}>תמלול חי</Text>
           </View>
-          <ScrollView style={styles.liveTranscriptionText}>
+          <ScrollView
+            ref={transcriptScrollRef}
+            style={styles.liveTranscriptionText}
+            onContentSizeChange={scrollTranscriptToBottom}
+          >
             <Text style={textStyles.bodyLg}>
-              {transcript || "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי."}
+              {transcript}
             </Text>
+            
+            {interimTranscript ? 
+            <Text style={[textStyles.bodyLg, {fontStyle: "italic", color: palette.primary[500]}]}>
+              {interimTranscript}
+            </Text>
+            :
+            null}
           </ScrollView>
         </SystemWrapper>
         <View style={styles.micButtonContainer}>
@@ -189,7 +216,7 @@ export default function Index() {
             <Text style={styles.micButtonLabel}>השהייה</Text>
           </View>
           <View style={styles.micButtonItem}>
-            <PushButton icon="close" pressed={false} onpress={() => {}} radius={spacing.xxxl} />
+            <PushButton icon="close" pressed={false} onpress={() => clearText()} radius={spacing.xxxl} />
             <Text style={styles.micButtonLabel}>ביטול</Text>
           </View>
         </View>
