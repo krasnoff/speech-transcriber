@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, Text, View, StyleSheet, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors, palette } from "@/design-system/colors";
@@ -10,6 +10,35 @@ import { PushButton } from "@/components/PushButton";
 export default function Index() {
   const [isMicPushed, setIsMicPushed] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [transcribedText, setTranscribedText] = useState("");
+
+  const increaseRecordingTime = () => {
+    setRecordingTime((prev) => prev + 1);
+  };
+
+  const formatRecordingTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600)
+      .toString()
+      .padStart(2, "0");
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
+  useEffect(() => {
+    if (!isMicPushed) {
+      return;
+    }
+
+    const intervalId = setInterval(increaseRecordingTime, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isMicPushed]);
 
   return (
     <View style={styles.container}>
@@ -18,7 +47,7 @@ export default function Index() {
       <View style={styles.RecordingWaveWrapperContainer}>
         <SystemWrapper>
           <View style={styles.clockRow}>
-            <Text style={styles.clockText}>00:37:11</Text>
+            <Text style={styles.clockText}>{formatRecordingTime(recordingTime)}</Text>
           </View>
 
           <View style={styles.waveContainer}>
@@ -48,10 +77,7 @@ export default function Index() {
           </View>
           <ScrollView style={styles.liveTranscriptionText}>
             <Text style={textStyles.bodyLg}>
-              זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.
-              \n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.
-              \n\n
-              הטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי.
+              {transcribedText || "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי."}
             </Text>
           </ScrollView>
         </SystemWrapper>
