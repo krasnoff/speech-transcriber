@@ -6,6 +6,8 @@
     "dev": "turbo run dev",
     "dev:web": "pnpm --filter web dev",
     "dev:mobile": "pnpm --filter mobile start",
+    "dev:mobile:android": "pnpm --filter mobile android",
+    "dev:mobile:android:install": "pnpm --filter mobile exec expo run:android --device",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

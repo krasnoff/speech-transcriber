@@ -11,6 +11,7 @@
       "icon": "./assets/images/logo-glow.png"
     },
     "android": {
+      "package": "com.speechtranscriber.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/logo-glow.png",
