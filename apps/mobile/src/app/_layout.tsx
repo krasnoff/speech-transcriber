@@ -8,6 +8,7 @@ import {
 import { colors } from "@/design-system/colors";
 import { fontFamily } from "@/design-system/typography";
 import { Drawer } from "expo-router/drawer";
+import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { I18nManager, Text, TextInput } from "react-native";
 import { useEffect } from "react";
@@ -60,32 +61,35 @@ export default function RootLayout() {
   }
 
   return (
-    <Drawer
-      screenOptions={{
-        sceneStyle: { direction: "ltr" },
-        headerTitleAlign: "left",
-        headerTitleContainerStyle: {
-          direction: "ltr",
-        },
-        headerTitleStyle: {
-          color: colors.dark.empathySoft,
-          fontFamily: fontFamily.sansBold,
-          writingDirection: "ltr",
-        },
-      }}
-    >
-      <Drawer.Screen
-        name="index"
-        options={{
-          title: "מתמלל ישיבות",
+    <>
+      <StatusBar style="dark" />
+      <Drawer
+        screenOptions={{
+          sceneStyle: { direction: "ltr" },
+          headerTitleAlign: "left",
+          headerTitleContainerStyle: {
+            direction: "ltr",
+          },
+          headerTitleStyle: {
+            color: colors.dark.empathySoft,
+            fontFamily: fontFamily.sansBold,
+            writingDirection: "ltr",
+          },
         }}
-      />
-      <Drawer.Screen
-        name="page2"
-        options={{
-          title: "מתמלל ישיבות",
-        }}
-      />
-    </Drawer>
+      >
+        <Drawer.Screen
+          name="index"
+          options={{
+            title: "מתמלל ישיבות",
+          }}
+        />
+        <Drawer.Screen
+          name="page2"
+          options={{
+            title: "מתמלל ישיבות",
+          }}
+        />
+      </Drawer>
+    </>
   );
 }
