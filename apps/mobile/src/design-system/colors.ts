@@ -11,6 +11,7 @@ type ColorScale = {
   700: string;
   800: string;
   900: string;
+  1000?: string;
 };
 
 const primary: ColorScale = {
@@ -28,8 +29,8 @@ const primary: ColorScale = {
 
 const secondary: ColorScale = {
   50: "#F3F0F0",
-  100: "#E4E2E1",
-  200: "#C8C6C6",
+  100: "#F5F3F3",
+  200: "#E4E2E1",
   300: "#ACABAA",
   400: "#929090",
   500: "#787777",
@@ -37,6 +38,7 @@ const secondary: ColorScale = {
   700: "#474747",
   800: "#303030",
   900: "#1B1C1C",
+  1000: "#F0E6E1"
 };
 
 const tertiary: ColorScale = {

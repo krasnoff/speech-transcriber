@@ -9,7 +9,7 @@ import { colors } from "@/design-system/colors";
 import { fontFamily } from "@/design-system/typography";
 import { Drawer } from "expo-router/drawer";
 import * as SplashScreen from "expo-splash-screen";
-import { Text, TextInput } from "react-native";
+import { I18nManager, Text, TextInput } from "react-native";
 import { useEffect } from "react";
 
 const TextComponent = Text as typeof Text & {
@@ -62,10 +62,15 @@ export default function RootLayout() {
   return (
     <Drawer
       screenOptions={{
+        sceneStyle: { direction: "ltr" },
         headerTitleAlign: "left",
+        headerTitleContainerStyle: {
+          direction: "ltr",
+        },
         headerTitleStyle: {
           color: colors.dark.empathySoft,
           fontFamily: fontFamily.sansBold,
+          writingDirection: "ltr",
         },
       }}
     >
