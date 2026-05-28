@@ -86,7 +86,7 @@ export default function RootLayout() {
         <Drawer.Screen
           name="page2"
           options={{
-            title: "מתמלל ישיבות",
+            title: "הרשאות",
           }}
         />
       </Drawer>

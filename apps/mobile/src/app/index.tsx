@@ -1,16 +1,27 @@
 import { useEffect, useState } from "react";
-import { Image, Text, View, StyleSheet, ScrollView } from "react-native";
+import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { colors, palette } from "@/design-system/colors";
 import { textStyles, typeScale } from "@/design-system/typography";
 import { spacing } from "@/design-system/layout";
 import { SystemWrapper } from "@/components/SystemWrapper";
 import { PushButton } from "@/components/PushButton";
+import { hasRequiredPermissions } from "@/lib/permissions";
+
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
 
 export default function Index() {
+  const router = useRouter();
   const [isMicPushed, setIsMicPushed] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [transcribedText, setTranscribedText] = useState("");
+  
+  const [recognizing, setRecognizing] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
 
   const increaseRecordingTime = () => {
     setRecordingTime((prev) => prev + 1);
@@ -29,16 +40,96 @@ export default function Index() {
   };
 
   useEffect(() => {
+    const checkPermissionsOnLoad = async () => {
+      const hasPermissions = await hasRequiredPermissions();
+
+      if (!hasPermissions) {
+        router.replace("/page2");
+      }
+    };
+
+    checkPermissionsOnLoad();
+  }, [router]);
+
+  useEffect(() => {
     if (!isMicPushed) {
       return;
     }
 
-    const intervalId = setInterval(increaseRecordingTime, 1000);
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+
+    const startRecordingSession = async () => {
+      const hasPermissions = await hasRequiredPermissions();
+
+      if (!hasPermissions) {
+        setIsMicPushed(false);
+        router.replace("/page2");
+        return;
+      }
+
+      startListening();
+      intervalId = setInterval(increaseRecordingTime, 1000);
+    };
+
+    startRecordingSession();
 
     return () => {
-      clearInterval(intervalId);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+
+      stopListening();
     };
-  }, [isMicPushed]);
+  }, [isMicPushed, router]);
+
+  useSpeechRecognitionEvent("start", () => {
+    setRecognizing(true);
+  });
+
+  useSpeechRecognitionEvent("end", () => {
+    setRecognizing(false);
+    setInterimTranscript("");
+  });
+
+  useSpeechRecognitionEvent("result", (event) => {
+    const text = event.results
+      .map((result) => result.transcript)
+      .join("");
+
+    if (event.isFinal) {
+      setTranscript((prev) => prev + text + " ");
+      setInterimTranscript("");
+    } else {
+      setInterimTranscript(text);
+    }
+  });
+
+  useSpeechRecognitionEvent("error", (event) => {
+    console.log("Speech recognition error:", event);
+    setRecognizing(false);
+    Alert.alert("Speech recognition error", event.message);
+  });
+
+  const startListening = async () => {
+    setTranscript("");
+    setInterimTranscript("");
+
+    ExpoSpeechRecognitionModule.start({
+      lang: "he-IL", // Hebrew
+      interimResults: true,
+      continuous: true,
+      maxAlternatives: 1,
+    });
+  };
+
+  const stopListening = () => {
+    ExpoSpeechRecognitionModule.stop();
+  };
+
+  const clearText = () => {
+    setTranscript("");
+    setInterimTranscript("");
+  };
 
   return (
     <View style={styles.container}>
@@ -77,7 +168,7 @@ export default function Index() {
           </View>
           <ScrollView style={styles.liveTranscriptionText}>
             <Text style={textStyles.bodyLg}>
-              {transcribedText || "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי."}
+              {transcript || "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי."}
             </Text>
           </ScrollView>
         </SystemWrapper>
