@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 import { colors, palette } from "@/design-system/colors";
 import { textStyles, typeScale } from "@/design-system/typography";
 import { spacing } from "@/design-system/layout";
@@ -26,6 +28,7 @@ export default function Index() {
   const initialText = "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי.";
   const [transcript, setTranscript] = useState(initialText);
 
+  
   const increaseRecordingTime = () => {
     setRecordingTime((prev) => prev + 1);
   };
@@ -156,6 +159,38 @@ export default function Index() {
     setIsMicPushed(false);
   };
 
+  const handleSaveShare = async () => {
+    if (isMicPushed) {
+      Alert.alert("Cannot save while recording", "Stop recording before sharing the transcript.");
+      return;
+    }
+
+    try {
+      const canShare = await Sharing.isAvailableAsync();
+
+      if (!canShare) {
+        Alert.alert("Sharing unavailable", "Sharing is not available on this device.");
+        return;
+      }
+
+      const fileUri = `${FileSystem.cacheDirectory}transcript-${Date.now()}.txt`;
+      await FileSystem.writeAsStringAsync(fileUri, transcript, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "text/plain",
+        dialogTitle: "Share transcript",
+        UTI: "public.plain-text",
+      });
+
+      clearText();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown sharing error";
+      Alert.alert("Share failed", message);
+    }
+  };
+
   const togglePause = () => {
     if (isPaused) {
       startListening();
@@ -226,7 +261,7 @@ export default function Index() {
         </View>
         <View style={styles.micButtonRow}>
           <View style={styles.micButtonItem}>
-            <PushButton icon="save" pressed={false} onpress={() => {}} radius={spacing.xxxl} />
+            <PushButton icon="save" pressed={false} onpress={handleSaveShare} radius={spacing.xxxl} />
             <Text style={styles.micButtonLabel}>שמירה</Text>
           </View>
           <View style={styles.micButtonItem}>
