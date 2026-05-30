@@ -28,13 +28,14 @@ export default function Index() {
   const initialText = "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי.";
   const [transcript, setTranscript] = useState(initialText);
 
-  
+  // For testing purposes, we can simulate recording time increase every second when the mic is pushed.
   const increaseRecordingTime = () => {
     setRecordingTime((prev) => prev + 1);
   };
 
   const [isPaused, setIsPaused] = useState(false);
 
+  // Format recording time as HH:MM:SS
   const formatRecordingTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600)
       .toString()
@@ -47,10 +48,12 @@ export default function Index() {
     return `${hours}:${minutes}:${seconds}`;
   };
 
+  // Scroll transcript to bottom when new text is added
   const scrollTranscriptToBottom = () => {
     transcriptScrollRef.current?.scrollToEnd({ animated: true });
   };
 
+  // Check permissions on load and redirect if not granted
   useEffect(() => {
     const checkPermissionsOnLoad = async () => {
       const hasPermissions = await hasRequiredPermissions();
@@ -63,10 +66,12 @@ export default function Index() {
     checkPermissionsOnLoad();
   }, [router]);
 
+  // Scroll transcript to bottom when new text is added
   useEffect(() => {
     scrollTranscriptToBottom();
   }, [transcript, interimTranscript]);
 
+  // Start/stop recording session when mic button is toggled
   useEffect(() => {
     if (!isMicPushed) {
       return;
@@ -97,6 +102,7 @@ export default function Index() {
     };
   }, [isMicPushed, router]);
 
+  // Increase recording time every second when recording
   useEffect(() => {
     if (!isMicPushed || isPaused) {
       return;
@@ -109,15 +115,18 @@ export default function Index() {
     };
   }, [isMicPushed, isPaused]);
 
+  // Handle speech recognition events
   useSpeechRecognitionEvent("start", () => {
     setRecognizing(true);
   });
 
+  // When recognition ends, we want to reset recognizing state and clear interim transcript
   useSpeechRecognitionEvent("end", () => {
     setRecognizing(false);
     setInterimTranscript("");
   });
 
+  // As results come in, we want to update the interim transcript and append to the final transcript when results are finalized
   useSpeechRecognitionEvent("result", (event) => {
     const text = event.results
       .map((result) => result.transcript)
@@ -133,12 +142,14 @@ export default function Index() {
     }
   });
 
+  // Handle errors by showing an alert and resetting recognizing state
   useSpeechRecognitionEvent("error", (event) => {
     // console.log("Speech recognition error:", event);
     setRecognizing(false);
     Alert.alert("Speech recognition error", event.message);
   });
 
+  // Start listening with specified options
   const startListening = async () => {
     ExpoSpeechRecognitionModule.start({
       lang: "he-IL", // Hebrew
@@ -148,10 +159,12 @@ export default function Index() {
     });
   };
 
+  // Stop listening
   const stopListening = () => {
     ExpoSpeechRecognitionModule.stop();
   };
 
+  // Clear transcript and reset state
   const clearText = () => {
     setTranscript(initialText);
     setInterimTranscript("");
@@ -159,6 +172,7 @@ export default function Index() {
     setIsMicPushed(false);
   };
 
+  // Handle saving and sharing the transcript
   const handleSaveShare = async () => {
     if (isMicPushed) {
       Alert.alert("Cannot save while recording", "Stop recording before sharing the transcript.");
@@ -191,6 +205,7 @@ export default function Index() {
     }
   };
 
+  // Toggle pause/resume recording
   const togglePause = () => {
     if (isPaused) {
       startListening();
