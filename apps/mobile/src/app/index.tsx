@@ -30,6 +30,8 @@ export default function Index() {
     setRecordingTime((prev) => prev + 1);
   };
 
+  const [isPaused, setIsPaused] = useState(false);
+
   const formatRecordingTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600)
       .toString()
@@ -67,7 +69,6 @@ export default function Index() {
       return;
     }
 
-    let intervalId: ReturnType<typeof setInterval> | undefined;
     setTranscript("");
 
     const startRecordingSession = async () => {
@@ -79,20 +80,31 @@ export default function Index() {
         return;
       }
 
+      setTranscript("");
+      setInterimTranscript("");
+
       startListening();
-      intervalId = setInterval(increaseRecordingTime, 1000);
     };
 
     startRecordingSession();
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-
       stopListening();
+      setIsPaused(false);
     };
   }, [isMicPushed, router]);
+
+  useEffect(() => {
+    if (!isMicPushed || isPaused) {
+      return;
+    }
+
+    const intervalId = setInterval(increaseRecordingTime, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isMicPushed, isPaused]);
 
   useSpeechRecognitionEvent("start", () => {
     setRecognizing(true);
@@ -125,9 +137,6 @@ export default function Index() {
   });
 
   const startListening = async () => {
-    setTranscript("");
-    setInterimTranscript("");
-
     ExpoSpeechRecognitionModule.start({
       lang: "he-IL", // Hebrew
       interimResults: true,
@@ -146,6 +155,15 @@ export default function Index() {
     setRecordingTime(0);
     setIsMicPushed(false);
   };
+
+  const togglePause = () => {
+    if (isPaused) {
+      startListening();
+    } else {
+      stopListening();
+    }
+    setIsPaused((prev) => !prev);
+  }
 
   return (
     <View style={styles.container}>
@@ -212,7 +230,7 @@ export default function Index() {
             <Text style={styles.micButtonLabel}>שמירה</Text>
           </View>
           <View style={styles.micButtonItem}>
-            <PushButton icon="pause" pressed={false} onpress={() => {}} radius={spacing.xxxl} />
+            <PushButton icon="pause" pressed={isPaused} onpress={togglePause} radius={spacing.xxxl} />
             <Text style={styles.micButtonLabel}>השהייה</Text>
           </View>
           <View style={styles.micButtonItem}>
