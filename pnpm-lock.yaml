@@ -4,6 +4,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+packageExtensionsChecksum: 8747dad8aed770c6686fac56dacf24ac
+
 importers:
 
   .:
@@ -57,6 +59,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@babel/generator':
+        specifier: 7.29.1
+        version: 7.29.1
       '@expo-google-fonts/heebo':
         specifier: ^0.4.2
         version: 0.4.2
@@ -8809,6 +8814,7 @@ snapshots:
   react-native-worklets@0.8.3(@babel/core@7.29.0)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(react-native@0.85.3(@babel/core@7.29.0)(@react-native/metro-config@0.85.3(@babel/core@7.29.0))(@types/react@19.2.2)(react@19.2.3))(react@19.2.3):
     dependencies:
       '@babel/core': 7.29.0
+      '@babel/generator': 7.29.1
       '@babel/plugin-transform-arrow-functions': 7.27.1(@babel/core@7.29.0)
       '@babel/plugin-transform-class-properties': 7.28.6(@babel/core@7.29.0)
       '@babel/plugin-transform-classes': 7.28.6(@babel/core@7.29.0)
@@ -8818,6 +8824,8 @@ snapshots:
       '@babel/plugin-transform-template-literals': 7.27.1(@babel/core@7.29.0)
       '@babel/plugin-transform-unicode-regex': 7.27.1(@babel/core@7.29.0)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.29.0)
+      '@babel/traverse': 7.29.0
+      '@babel/types': 7.29.0
       '@react-native/metro-config': 0.85.3(@babel/core@7.29.0)
       convert-source-map: 2.0.0
       react: 19.2.3
