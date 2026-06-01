@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
+import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { colors, palette } from "@/design-system/colors";
 import { textStyles, typeScale } from "@/design-system/typography";
 import { spacing } from "@/design-system/layout";
 import { SystemWrapper } from "@/components/SystemWrapper";
 import { PushButton } from "@/components/PushButton";
-import { hasRequiredPermissions } from "@/lib/permissions";
+import { requestRequiredPermissions } from "@/lib/permissions";
 
 import {
   ExpoSpeechRecognitionModule,
@@ -17,7 +17,6 @@ import {
 } from "expo-speech-recognition";
 
 export default function Index() {
-  const router = useRouter();
   const transcriptScrollRef = useRef<ScrollView>(null);
   const [isMicPushed, setIsMicPushed] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -53,23 +52,24 @@ export default function Index() {
     transcriptScrollRef.current?.scrollToEnd({ animated: true });
   };
 
-  // Check permissions on load and redirect if not granted
-  useEffect(() => {
-    const checkPermissionsOnLoad = async () => {
-      const hasPermissions = await hasRequiredPermissions();
-
-      if (!hasPermissions) {
-        router.replace("/page2");
-      }
-    };
-
-    checkPermissionsOnLoad();
-  }, [router]);
-
   // Scroll transcript to bottom when new text is added
   useEffect(() => {
     scrollTranscriptToBottom();
   }, [transcript, interimTranscript]);
+
+  // Keep the screen awake while the recorder is active.
+  useEffect(() => {
+    if (!isMicPushed) {
+      deactivateKeepAwake().catch(() => {});
+      return;
+    }
+
+    activateKeepAwakeAsync().catch(() => {});
+
+    return () => {
+      deactivateKeepAwake().catch(() => {});
+    };
+  }, [isMicPushed]);
 
   // Start/stop recording session when mic button is toggled
   useEffect(() => {
@@ -80,11 +80,14 @@ export default function Index() {
     setTranscript("");
 
     const startRecordingSession = async () => {
-      const hasPermissions = await hasRequiredPermissions();
+      const hasPermissions = await requestRequiredPermissions();
 
       if (!hasPermissions) {
         setIsMicPushed(false);
-        router.replace("/page2");
+        Alert.alert(
+          "Missing permissions",
+          "Please enable microphone and storage permissions to start recording."
+        );
         return;
       }
 
@@ -100,7 +103,7 @@ export default function Index() {
       stopListening();
       setIsPaused(false);
     };
-  }, [isMicPushed, router]);
+  }, [isMicPushed]);
 
   // Increase recording time every second when recording
   useEffect(() => {
