@@ -127,6 +127,8 @@ export default function Index() {
   useSpeechRecognitionEvent("end", () => {
     setRecognizing(false);
     setInterimTranscript("");
+
+    reStartListening();
   });
 
   // As results come in, we want to update the interim transcript and append to the final transcript when results are finalized
@@ -150,7 +152,17 @@ export default function Index() {
     // console.log("Speech recognition error:", event);
     setRecognizing(false);
     Alert.alert("Speech recognition error", event.message);
+
+    reStartListening();
   });
+
+  const reStartListening = () => {
+    if (isMicPushed && !isPaused) {
+      setTimeout(() => {
+        startListening();
+      }, 300);
+    }
+  }
 
   // Start listening with specified options
   const startListening = async () => {
