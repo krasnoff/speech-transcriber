@@ -196,37 +196,44 @@ export default function Index() {
       return;
     }
 
-    try {
-      const canShare = await Sharing.isAvailableAsync();
+    // try {
+    //   const canShare = await Sharing.isAvailableAsync();
 
-      if (!canShare) {
-        Alert.alert("Sharing unavailable", "Sharing is not available on this device.");
-        return;
-      }
+    //   if (!canShare) {
+    //     Alert.alert("Sharing unavailable", "Sharing is not available on this device.");
+    //     return;
+    //   }
 
-      const fileUri = `${FileSystem.cacheDirectory}transcript-${Date.now()}.txt`;
-      await FileSystem.writeAsStringAsync(fileUri, transcript, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
+    //   const fileUri = `${FileSystem.cacheDirectory}transcript-${Date.now()}.txt`;
+    //   await FileSystem.writeAsStringAsync(fileUri, transcript, {
+    //     encoding: FileSystem.EncodingType.UTF8,
+    //   });
 
-      await Sharing.shareAsync(fileUri, {
-        mimeType: "text/plain",
-        dialogTitle: "Share transcript",
-        UTI: "public.plain-text",
-      });
+    //   await Sharing.shareAsync(fileUri, {
+    //     mimeType: "text/plain",
+    //     dialogTitle: "Share transcript",
+    //     UTI: "public.plain-text",
+    //   });
 
-      router.push({
-        pathname: "/transcription-text",
-        params: {
-          transcript: transcript,
-        },
-      });
-      clearText();
+    //   router.push({
+    //     pathname: "/transcription-text",
+    //     params: {
+    //       transcript: transcript,
+    //     },
+    //   });
+    //   clearText();
       
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown sharing error";
-      Alert.alert("Share failed", message);
-    }
+    // } catch (error) {
+    //   const message = error instanceof Error ? error.message : "Unknown sharing error";
+    //   Alert.alert("Share failed", message);
+    // }
+    router.push({
+      pathname: "/transcription-text",
+      params: {
+        transcript: transcript,
+      },
+    });
+    clearText();
   };
 
   // Toggle pause/resume recording
