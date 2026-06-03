@@ -87,6 +87,14 @@ export default function RootLayout() {
           name="page2"
           options={{
             title: "הרשאות",
+            drawerItemStyle: { display: "none" },
+          }}
+        />
+        <Drawer.Screen
+          name="transcription-text"
+          options={{
+            title: "תמלול",
+            drawerItemStyle: { display: "none" },
           }}
         />
       </Drawer>

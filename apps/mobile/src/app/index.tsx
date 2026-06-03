@@ -10,6 +10,7 @@ import { spacing } from "@/design-system/layout";
 import { SystemWrapper } from "@/components/SystemWrapper";
 import { PushButton } from "@/components/PushButton";
 import { requestRequiredPermissions } from "@/lib/permissions";
+import { useRouter } from "expo-router";
 
 import {
   ExpoSpeechRecognitionModule,
@@ -17,6 +18,7 @@ import {
 } from "expo-speech-recognition";
 
 export default function Index() {
+  const router = useRouter();
   const transcriptScrollRef = useRef<ScrollView>(null);
   const [isMicPushed, setIsMicPushed] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -213,7 +215,14 @@ export default function Index() {
         UTI: "public.plain-text",
       });
 
+      router.push({
+        pathname: "/transcription-text",
+        params: {
+          transcript: transcript,
+        },
+      });
       clearText();
+      
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown sharing error";
       Alert.alert("Share failed", message);
