@@ -1,4 +1,5 @@
 import { colors, palette } from "@/design-system/colors";
+import { commonStyles } from "@/design-system/common-styles";
 import { spacing } from "@/design-system/layout";
 import { textStyles } from "@/design-system/typography";
 import MaterialIcons from "@expo/vector-icons/build/MaterialIcons";
@@ -16,14 +17,14 @@ export default function TranscriptionTextPage() {
         .filter((item) => item.length > 0);
 
   return (
-    <View style={styles.container}>
-            <View style={styles.liveTranscriptionRow}>
+    <View style={commonStyles.container}>
+            <View style={commonStyles.liveTranscriptionRow}>
                 <MaterialIcons
                     name={"notes" as React.ComponentProps<typeof MaterialIcons>["name"]}
                     size={20}
                     color={palette.primary[700]}
                 />
-                <Text style={styles.title}>תוכן התמלול</Text>
+                <Text style={commonStyles.title}>תוכן התמלול</Text>
             </View>
 
             <ScrollView
@@ -59,27 +60,6 @@ export default function TranscriptionTextPage() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
-        paddingHorizontal: spacing.xl,
-        gap: spacing.sm,
-        direction: "rtl",
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.xl,
-    },
-    title: {
-        ...textStyles.titleMd,
-        color: colors.light.textPrimary,
-    },
-    liveTranscriptionRow: {
-        width: "100%",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        gap: spacing.xs,
-    },
     transcriptionListContent: {
         paddingBottom: spacing.xxxl + spacing.xl,
     },

@@ -16,6 +16,7 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
+import { commonStyles } from "@/design-system/common-styles";
 
 export default function Index() {
   const router = useRouter();
@@ -247,8 +248,8 @@ export default function Index() {
   }
 
   return (
-    <View style={styles.container}>
-      {isMicPushed ? <Text style={styles.title}>מקליט</Text> : <Text style={styles.title}>בהמתנה</Text>}
+    <View style={commonStyles.container}>
+      {isMicPushed ? <Text style={commonStyles.title}>מקליט</Text> : <Text style={commonStyles.title}>בהמתנה</Text>}
       
       <View style={styles.RecordingWaveWrapperContainer}>
         <SystemWrapper>
@@ -273,7 +274,7 @@ export default function Index() {
       </View>
       <View style={styles.RecordingWaveWrapperContainer}>
         <SystemWrapper backgroundColor={palette.secondary[100]} borderColor={palette.secondary[1000]}>
-          <View style={styles.liveTranscriptionRow}>
+          <View style={commonStyles.liveTranscriptionRow}>
             <MaterialIcons
               name="graphic-eq"
               size={20}
@@ -325,30 +326,10 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    paddingHorizontal: spacing.xl,
-    gap: spacing.sm,
-    direction: "rtl",
-    paddingTop: spacing.lg,
-  },
-  title: {
-    ...textStyles.titleMd,
-    color: colors.light.textPrimary,
-  },
   title2: {
     ...textStyles.titleMd,
     color: colors.light.textPrimary,
     fontSize: typeScale.titleSm,
-  },
-  liveTranscriptionRow: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: spacing.xs,
   },
   liveTranscriptionText: {
     maxHeight: 150,
