@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "API: Debug (Deterministic Attach)",
+      "configurations": ["API: Debug (Inspect 9230)", "API: Attach (9230)"],
+      "stopAll": true
+    }
+  ],
+  "configurations": [
+    {
+      "name": "API: Debug",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "cd apps/web && pnpm exec next dev --webpack",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG_TRANSCRIBE_BREAKPOINT": "1"
+      }
+    },
+    {
+      "name": "API: Debug (Inspect 9230)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "cd apps/web && pnpm exec next dev --webpack --inspect 9230",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG_TRANSCRIBE_BREAKPOINT": "1"
+      }
+    },
+    {
+      "name": "API: Attach (9230)",
+      "type": "node",
+      "request": "attach",
+      "port": 9230,
+      "restart": true,
+      "sourceMaps": true,
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}/apps/web",
+      "timeout": 60000
+    },
+    {
+      "name": "Mobile: Debug Web (Launch Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8081",
+      "webRoot": "${workspaceFolder}/apps/mobile",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "/*": "${workspaceFolder}/*",
+        "webpack://mobile/./*": "${workspaceFolder}/apps/mobile/*",
+        "webpack://*/./*": "${workspaceFolder}/*"
+      }
+    },
+    {
+      "name": "Mobile: Debug Web (Attach Chrome)",
+      "type": "chrome",
+      "request": "attach",
+      "url": "http://localhost:8081",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}/apps/mobile",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "/*": "${workspaceFolder}/*",
+        "webpack://mobile/./*": "${workspaceFolder}/apps/mobile/*",
+        "webpack://*/./*": "${workspaceFolder}/*"
+      }
+    }
+  ]
+}

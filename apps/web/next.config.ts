@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Pin workspace root so Turbopack resolves sources in this monorepo correctly.
+  turbopack: {
+    root: path.join(__dirname, "../.."),
+  },
   reactCompiler: true,
 };
 
