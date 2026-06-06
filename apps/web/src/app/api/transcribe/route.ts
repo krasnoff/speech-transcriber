@@ -9,11 +9,11 @@ type TranscribeRequestBody = {
 };
 
 const transcriptionSummarySchema = z.object({
-  "overallSummary": z.string(),
-  "mainInsights": z.string(),
-  "toDoList": z.array(
+  overallSummary: z.string(),
+  mainInsights: z.string(),
+  toDoList: z.array(
     z.object({
-      "teamMemberName": z.string(),
+      teamMemberName: z.string(),
       todo: z.array(
         z.object({
           item: z.string(),
