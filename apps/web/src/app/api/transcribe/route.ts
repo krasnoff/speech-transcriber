@@ -1,11 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { systemPrompt } from "@/lib/system_prompt";
 
 type TranscribeRequestBody = {
   transcript?: string;
 };
+
+const transcriptionSummarySchema = z.object({
+  "overall summary": z.string(),
+  "main-insights": z.string(),
+  "to-do-list": z.array(
+    z.object({
+      "team-member-name": z.string(),
+      todo: z.array(
+        z.object({
+          item: z.string(),
+        })
+      ),
+    })
+  ),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,16 +40,14 @@ export async function POST(req: NextRequest) {
       apiKey: process.env.OLLAMA_API_KEY ?? "",
     });
 
-    const result = await generateText({
+    const result = await generateObject({
       model: ollama(process.env.OLLAMA_MODEL ?? "gpt-oss:120b-cloud"),
       system: systemPrompt,
       prompt: transcript,
+      schema: transcriptionSummarySchema,
     });
 
-    return NextResponse.json({
-      response: result.text,
-      usage: result.usage,
-    });
+    return NextResponse.json(result.object);
   } catch (error) {
     console.error("Transcribe request failed:", error);
     return NextResponse.json({ error: "Chat request failed." }, { status: 500 });

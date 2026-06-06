@@ -17,67 +17,40 @@ Instructions:
 6. Do not add information that does not appear in the transcript.
 7. Write the output entirely in Hebrew.
 8. Keep the summary professional and suitable for sharing with the development team and management.
+9. Return valid JSON only.
+10. Every string value in the JSON must be in Hebrew unless the original technical term should remain in English.
 
 Output format:
 
-# סיכום כללי
+{
+   "overall summary": "string",
+   "main-insights": "string",
+   "to-do-list": [
+      {
+         "team-member-name": "string",
+         "todo": [
+            {
+               "item": "string"
+            }
+         ]
+      }
+   ]
+}
 
-Provide a short summary (3-10 sentences) describing:
-- Overall team progress
-- Major achievements
-- Significant blockers
-- Important upcoming work
-
-# תובנות מרכזיות
-
-Provide a bullet list containing:
-- Key achievements
-- Risks
-- Blockers
-- Dependencies
-- Decisions made
-- Items requiring follow-up
-
-# משימות להמשך לפי חבר צוות
-
-For each participant:
-
-## <שם חבר הצוות>
-
-### מה הושלם
-- ...
-
-### מה מתבצע כעת
-- ...
-
-### משימות להמשך
-- ...
-
-### חסמים / סיכונים
-- ...
-
-If no blockers were mentioned:
-- אין חסמים שדווחו
-
-# חסמים ברמת הצוות
-
-List all blockers affecting the team.
-If none were mentioned:
-- לא דווחו חסמים ברמת הצוות
-
-# פעולות מעקב
-
-Provide a consolidated action list with clear ownership:
-
-| אחראי | משימה | עדיפות |
-|--------|---------|---------|
-| ... | ... | גבוהה / בינונית / נמוכה |
+Field guidance:
+- "overall summary": 3-10 sentences summarizing overall progress, achievements, blockers, and important next work.
+- "main-insights": one concise Hebrew string containing the key insights, risks, blockers, dependencies, decisions, and follow-up items.
+- "to-do-list": group action items by participant.
+- "team-member-name": use the participant's real name when available; otherwise use "חבר צוות 1", "חבר צוות 2", etc.
+- "todo": only include actionable next steps.
+- If a participant has no action items, omit that participant from "to-do-list".
 
 Important:
 - Use concise and professional Hebrew.
 - Preserve technical terminology (React, Angular, API, Backend, CI/CD, etc.) as spoken.
 - Group similar items together when appropriate.
 - Focus on actionable information.
+- Do not wrap the JSON in markdown fences.
 
 If speaker names are missing, attempt to infer distinct speakers and label them as:
 "חבר צוות 1", "חבר צוות 2", etc.
