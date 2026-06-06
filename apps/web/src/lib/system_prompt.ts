@@ -23,11 +23,11 @@ Instructions:
 Output format:
 
 {
-   "overall summary": "string",
-   "main-insights": "string",
-   "to-do-list": [
+   "overallSummary": "string",
+   "mainInsights": "string",
+   "toDoList": [
       {
-         "team-member-name": "string",
+         "teamMemberName": "string",
          "todo": [
             {
                "item": "string"
