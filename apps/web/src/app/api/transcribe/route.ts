@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateObject } from "ai";
 import { z } from "zod";
 import { systemPrompt } from "@/lib/system_prompt";
 
@@ -25,6 +23,11 @@ const transcriptionSummarySchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const [{ createOpenAI }, { generateObject }] = await Promise.all([
+      import("@ai-sdk/openai"),
+      import("ai"),
+    ]);
+
     const body = (await req.json()) as TranscribeRequestBody;
     const transcript = body?.transcript?.trim();
 

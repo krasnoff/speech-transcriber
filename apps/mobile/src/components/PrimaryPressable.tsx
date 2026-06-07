@@ -5,11 +5,13 @@ import { spacing } from "@/design-system/layout";
 
 type PrimaryPressableProps = {
   children: ReactNode;
+  onPress?: () => void;
 };
 
-export function PrimaryPressable({ children }: PrimaryPressableProps) {
+export function PrimaryPressable({ children, onPress }: PrimaryPressableProps) {
   return (
     <Pressable
+      onPress={onPress}
       style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
       accessibilityRole="button"
     >

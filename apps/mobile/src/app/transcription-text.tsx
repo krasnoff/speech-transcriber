@@ -4,21 +4,57 @@ import { spacing } from "@/design-system/layout";
 import { textStyles } from "@/design-system/typography";
 import { PrimaryPressable } from "@/components/PrimaryPressable";
 import MaterialIcons from "@expo/vector-icons/build/MaterialIcons";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import useGetData from "@/hooks/useGetData";
+import { Methods } from "@/enums/methods.enums";
+import FadeModal from "@/components/fade-modal";
+import { useEffect } from "react";
+import type { DataResponse } from "@/types/dataResponse";
+
+
 
 export default function TranscriptionTextPage() {
-  const params = useLocalSearchParams<{ transcript?: string | string[] }>();
-  const transcript = Array.isArray(params.transcript)
-    ? params.transcript[0] ?? ""
-    : params.transcript ?? "";
+    const router = useRouter();
+    const { data, error, loading, fetchData, cancelRequest, setLoading } = useGetData('transcribe', Methods.POST);
+
+    const params = useLocalSearchParams<{ transcript?: string | string[] }>();
+    const transcript = Array.isArray(params.transcript)
+        ? params.transcript[0] ?? ""
+        : params.transcript ?? "";
     const transcriptArr = transcript
         .split("\n")
         .map((item) => item.trim())
         .filter((item) => item.length > 0);
+    
+    useEffect(() => {
+        if (data && typeof data === 'object' && 'overallSummary' in data && 'mainInsights' in data && 'toDoList' in data) {
+            console.log('API response:', data);
+        } else if (error) {
+            console.error('API error:', error);
+        }
 
-  return (
-    <View style={commonStyles.container}>
+        setLoading(false);
+    }, [data, error]);
+
+    const handleSubmit = () => {
+        setLoading(true);
+
+        const body = {
+            transcript: transcript
+        };
+
+        fetchData(body);
+    }
+
+    const handleCloseModal = () => {
+        // Cancel any ongoing API request
+        cancelRequest();
+        setLoading(false);
+    }
+
+    return (
+        <View style={commonStyles.container}>
             <View style={commonStyles.liveTranscriptionRow}>
                 <MaterialIcons
                     name={"notes" as React.ComponentProps<typeof MaterialIcons>["name"]}
@@ -40,7 +76,14 @@ export default function TranscriptionTextPage() {
             </ScrollView>
 
             <View style={styles.bottomActionContainer}>
-                <PrimaryPressable>
+                <PrimaryPressable
+                    onPress={() => {
+                        /*router.push({
+                            pathname: "/transcription-summary" as never,
+                            params: { transcript },
+                        });*/handleSubmit();
+                    }}
+                >
                     <MaterialIcons
                         name={"auto-awesome" as React.ComponentProps<typeof MaterialIcons>["name"]}
                         size={19}
@@ -49,8 +92,9 @@ export default function TranscriptionTextPage() {
                     <Text style={styles.bottomActionText}>סכם באמצעות בינה מלאכותית</Text>
                 </PrimaryPressable>
             </View>
-    </View>
-  );
+            <FadeModal visible={loading} onClose={handleCloseModal} />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({

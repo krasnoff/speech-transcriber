@@ -97,6 +97,13 @@ export default function RootLayout() {
             drawerItemStyle: { display: "none" },
           }}
         />
+        <Drawer.Screen
+          name="transcription-summary"
+          options={{
+            title: "סיכום",
+            drawerItemStyle: { display: "none" },
+          }}
+        />
       </Drawer>
     </>
   );
