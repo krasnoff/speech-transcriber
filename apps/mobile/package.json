@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@repo/common": "workspace:*",
     "@babel/generator": "7.29.1",
     "@expo-google-fonts/heebo": "^0.4.2",
     "@expo/ui": "~56.0.13",

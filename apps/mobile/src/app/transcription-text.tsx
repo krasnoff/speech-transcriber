@@ -6,10 +6,10 @@ import { PrimaryPressable } from "@/components/PrimaryPressable";
 import MaterialIcons from "@expo/vector-icons/build/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import useGetData from "@/hooks/useGetData";
-import { Methods } from "@/enums/methods.enums";
 import FadeModal from "@/components/fade-modal";
 import { useEffect } from "react";
+import useGetData from "@/hooks/useGetData";
+import { Methods } from "@/enums/methods.enums";
 
 export default function TranscriptionTextPage() {
     const router = useRouter();

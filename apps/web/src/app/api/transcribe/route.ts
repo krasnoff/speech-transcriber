@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { systemPrompt } from "@/lib/system_prompt";
+import { systemPrompt } from "@repo/common/lib/system_prompt";
 
 type TranscribeRequestBody = {
   transcript?: string;

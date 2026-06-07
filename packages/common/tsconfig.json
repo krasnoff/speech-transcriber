@@ -1,0 +1,8 @@
+{
+  "extends": "@repo/typescript-config/react-library.json",
+  "compilerOptions": {
+    "strictNullChecks": true
+  },
+  "include": ["src", "../../apps/mobile/src/enums/methods.enums.ts", "../../apps/mobile/src/hooks/useGetData.ts"],
+  "exclude": ["node_modules", "dist"]
+}

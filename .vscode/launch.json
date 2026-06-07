@@ -12,7 +12,7 @@
       "name": "API: Debug",
       "type": "node-terminal",
       "request": "launch",
-      "command": "cd apps/web && pnpm exec next dev --webpack",
+      "command": "cd apps/api && pnpm exec tsx watch src/index.ts",
       "env": {
         "NODE_ENV": "development",
         "DEBUG_TRANSCRIBE_BREAKPOINT": "1"
@@ -22,7 +22,7 @@
       "name": "API: Debug (Inspect 9230)",
       "type": "node-terminal",
       "request": "launch",
-      "command": "cd apps/web && pnpm exec next dev --webpack --inspect 9230",
+      "command": "cd apps/api && pnpm exec tsx watch --inspect=9230 src/index.ts",
       "env": {
         "NODE_ENV": "development",
         "DEBUG_TRANSCRIBE_BREAKPOINT": "1"
@@ -37,7 +37,7 @@
       "sourceMaps": true,
       "smartStep": true,
       "skipFiles": ["<node_internals>/**"],
-      "cwd": "${workspaceFolder}/apps/web",
+      "cwd": "${workspaceFolder}/apps/api",
       "timeout": 60000
     },
     {

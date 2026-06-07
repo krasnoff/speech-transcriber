@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@repo/common": "workspace:*",
     "@ai-sdk/openai": "^3.0.68",
     "ai": "^6.0.197",
     "dotenv": "^17.4.2",
