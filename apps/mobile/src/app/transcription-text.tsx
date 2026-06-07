@@ -10,9 +10,6 @@ import useGetData from "@/hooks/useGetData";
 import { Methods } from "@/enums/methods.enums";
 import FadeModal from "@/components/fade-modal";
 import { useEffect } from "react";
-import type { DataResponse } from "@/types/dataResponse";
-
-
 
 export default function TranscriptionTextPage() {
     const router = useRouter();
@@ -30,6 +27,10 @@ export default function TranscriptionTextPage() {
     useEffect(() => {
         if (data && typeof data === 'object' && 'overallSummary' in data && 'mainInsights' in data && 'toDoList' in data) {
             console.log('API response:', data);
+            router.push({
+                pathname: "/transcription-summary" as never,
+                params: { data: JSON.stringify(data) },
+            });
         } else if (error) {
             console.error('API error:', error);
         }

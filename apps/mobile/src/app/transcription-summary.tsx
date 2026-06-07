@@ -21,23 +21,8 @@ const createFallbackSummary = (transcript: string) => {
 
 export default function TranscriptionSummaryPage() {
   const params = useLocalSearchParams<{
-    summary?: string | string[];
-    transcript?: string | string[];
+    data?: string;
   }>();
-
-  const transcript = Array.isArray(params.transcript)
-    ? params.transcript[0] ?? ""
-    : params.transcript ?? "";
-
-  const incomingSummary = Array.isArray(params.summary)
-    ? params.summary[0] ?? ""
-    : params.summary ?? "";
-
-  const summary = incomingSummary.trim() || createFallbackSummary(transcript);
-  const summaryItems = summary
-    .split("\n")
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
 
   return (
     <View style={commonStyles.container}>
@@ -54,12 +39,15 @@ export default function TranscriptionSummaryPage() {
         style={styles.summaryScroll}
         contentContainerStyle={styles.summaryListContent}
       >
-        {summaryItems.map((item, index) => (
-          <View key={`${index}-${item.slice(0, 16)}`} style={styles.summaryRow}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.summaryText}>{item}</Text>
-          </View>
-        ))}
+        {params.data ? (
+          <>
+            <Text style={styles.summaryText}>{JSON.parse(params.data).overallSummary}</Text>
+          </>
+        ) : (
+          <Text style={styles.summaryText}>
+            {createFallbackSummary(params.data as string)}
+          </Text>
+        )}
       </ScrollView>
     </View>
   );
