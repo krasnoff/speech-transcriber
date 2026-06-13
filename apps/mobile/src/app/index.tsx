@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system/legacy";
-import * as Sharing from "expo-sharing";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { colors, palette } from "@/design-system/colors";
 import { textStyles, typeScale } from "@/design-system/typography";

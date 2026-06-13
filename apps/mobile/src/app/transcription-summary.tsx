@@ -5,7 +5,9 @@ import { radius, size, spacing } from "@/design-system/layout";
 import { textStyles } from "@/design-system/typography";
 import MaterialIcons from "@expo/vector-icons/build/MaterialIcons";
 import { useLocalSearchParams } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 
 type ToDoItem = {
   teamMemberName?: string;
@@ -81,6 +83,33 @@ export default function TranscriptionSummaryPage() {
     minute: "2-digit",
   });
 
+  const handleSharePress = async () => {  
+    try {
+      const canShare = await Sharing.isAvailableAsync();  
+    
+      if (!canShare) {
+        Alert.alert("Sharing unavailable", "Sharing is not available on this device.");
+        return;
+      }
+
+      // TODO - write transcript here instead of empty string, and also consider sharing the summary and insights in a more formatted way
+      const fileUri = `${FileSystem.cacheDirectory}transcript-${Date.now()}.txt`;
+      await FileSystem.writeAsStringAsync(fileUri, "hello, how are you", {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "text/plain",
+        dialogTitle: "Share transcript",
+        UTI: "public.plain-text",
+      });
+      
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown sharing error";
+      Alert.alert("Share failed", message);
+    }
+  }
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.contentContainer}>
       <View style={commonStyles.liveTranscriptionRow}>
@@ -92,7 +121,7 @@ export default function TranscriptionSummaryPage() {
       </View>
 
       <View style={[commonStyles.liveTranscriptionRow, {marginBottom: spacing.lg}]}>
-        <Pressable accessibilityRole="button" style={styles.shareButton}>
+        <Pressable accessibilityRole="button" style={styles.shareButton} onPress={handleSharePress}>
           <View style={styles.shareButtonContent}>
             <MaterialIcons
               name={"share" as React.ComponentProps<typeof MaterialIcons>["name"]}
