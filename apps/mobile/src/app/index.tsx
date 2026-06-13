@@ -194,38 +194,6 @@ export default function Index() {
       Alert.alert("Cannot save while recording", "Stop recording before sharing the transcript.");
       return;
     }
-
-    // try {
-    //   const canShare = await Sharing.isAvailableAsync();
-
-    //   if (!canShare) {
-    //     Alert.alert("Sharing unavailable", "Sharing is not available on this device.");
-    //     return;
-    //   }
-
-    //   const fileUri = `${FileSystem.cacheDirectory}transcript-${Date.now()}.txt`;
-    //   await FileSystem.writeAsStringAsync(fileUri, transcript, {
-    //     encoding: FileSystem.EncodingType.UTF8,
-    //   });
-
-    //   await Sharing.shareAsync(fileUri, {
-    //     mimeType: "text/plain",
-    //     dialogTitle: "Share transcript",
-    //     UTI: "public.plain-text",
-    //   });
-
-    //   router.push({
-    //     pathname: "/transcription-text",
-    //     params: {
-    //       transcript: transcript,
-    //     },
-    //   });
-    //   clearText();
-      
-    // } catch (error) {
-    //   const message = error instanceof Error ? error.message : "Unknown sharing error";
-    //   Alert.alert("Share failed", message);
-    // }
     router.push({
       pathname: "/transcription-text",
       params: {
