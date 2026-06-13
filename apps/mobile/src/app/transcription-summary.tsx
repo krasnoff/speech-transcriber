@@ -42,32 +42,37 @@ export default function TranscriptionSummaryPage() {
 
   const rawData = Array.isArray(params.data) ? params.data[0] : params.data;
 
-  const parseInsightProperty = (propertyKey: "overallSummary" | "mainInsights"): string => {
+  const parseSummaryPayload = (): SummaryPayload | null => {
     if (!rawData) {
-      return createFallbackSummary("");
+      return null;
     }
 
     try {
       const decodedData = decodeURIComponent(rawData);
-      const parsed = JSON.parse(decodedData) as SummaryPayload;
-      return parsed[propertyKey]?.trim() || createFallbackSummary("");
+      return JSON.parse(decodedData) as SummaryPayload;
     } catch {
-      return createFallbackSummary(rawData);
+      return null;
     }
   };
 
+  const parseInsightProperty = (propertyKey: "overallSummary" | "mainInsights"): string => {
+    const parsed = parseSummaryPayload();
+
+    if (!parsed) {
+      return createFallbackSummary(rawData || "");
+    }
+
+    return parsed[propertyKey]?.trim() || createFallbackSummary("");
+  };
+
   const parseToDoList = (propertyKey: "toDoList"): ToDoItem[] => {
-    if (!rawData) {
+    const parsed = parseSummaryPayload();
+
+    if (!parsed) {
       return [];
     }
 
-    try {
-      const decodedData = decodeURIComponent(rawData);
-      const parsed = JSON.parse(decodedData) as SummaryPayload;
-      return parsed[propertyKey] || [];
-    } catch {
-      return [];
-    }
+    return parsed[propertyKey] || [];
   };
 
   const summaryText = parseInsightProperty("overallSummary");
@@ -83,6 +88,36 @@ export default function TranscriptionSummaryPage() {
     minute: "2-digit",
   });
 
+  const buildShareText = () => {
+    const toDoListText = toDoItems.length
+      ? toDoItems
+          .map((item) => {
+            const itemTexts = item.todo?.map((todoItem) => todoItem.item?.trim()).filter(Boolean) ?? [];
+
+            if (!item.teamMemberName) {
+              return itemTexts.join(":\n");
+            }
+
+            if (itemTexts.length === 0) {
+              return item.teamMemberName;
+            }
+
+            return `${item.teamMemberName}:\n${itemTexts.join("\n")}`;
+          })
+          .filter((line) => line.length > 0)
+          .join("\n\n")
+      : "אין משימות לביצוע.";
+
+    return [
+      "סיכום ישיבה",
+      formattedDate,
+      "",
+      `סיכום:\n${summaryText}\n`,
+      `תובנות מרכזיות:\n${mainInsightsText}\n`,
+      `משימות לביצוע:\n\n${toDoListText}`,
+    ].join("\n");
+  };
+
   const handleSharePress = async () => {  
     try {
       const canShare = await Sharing.isAvailableAsync();  
@@ -92,9 +127,8 @@ export default function TranscriptionSummaryPage() {
         return;
       }
 
-      // TODO - write transcript here instead of empty string, and also consider sharing the summary and insights in a more formatted way
       const fileUri = `${FileSystem.cacheDirectory}transcript-${Date.now()}.txt`;
-      await FileSystem.writeAsStringAsync(fileUri, "hello, how are you", {
+      await FileSystem.writeAsStringAsync(fileUri, buildShareText(), {
         encoding: FileSystem.EncodingType.UTF8,
       });
 

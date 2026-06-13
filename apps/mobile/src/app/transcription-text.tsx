@@ -26,7 +26,7 @@ export default function TranscriptionTextPage() {
     
     useEffect(() => {
         if (data && typeof data === 'object' && 'overallSummary' in data && 'mainInsights' in data && 'toDoList' in data) {
-            console.log('API response:', data);
+            // console.log('API response:', data);
             router.push({
                 pathname: "/transcription-summary" as never,
                 params: { data: JSON.stringify(data) },
