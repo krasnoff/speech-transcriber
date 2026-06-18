@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
     <main className={styles.page}>
       <article className={styles.card}>
         <header className={styles.hero}>
-          <h2>Privacy Policy</h2>
+          <h1>Privacy Policy</h1>
           <p className={styles.meta}>Last updated: June 2026</p>
         </header>
 
