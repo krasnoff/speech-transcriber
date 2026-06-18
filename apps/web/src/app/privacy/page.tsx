@@ -1,116 +1,108 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Speech Transcriber",
-  description: "How Speech Transcriber handles audio, transcripts, and related data.",
+  title: "Privacy Policy | AI Transcriber",
+  description: "Privacy policy for AI Transcriber.",
 };
-
-const effectiveDate = "June 18, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
     <main className={styles.page}>
-      {/* <div className={styles.backLinkWrap}>
-        <Link className={styles.backLink} href="/">
-          Back to home
-        </Link>
-      </div> */}
-
       <article className={styles.card}>
         <header className={styles.hero}>
-          <p className={styles.kicker}>Privacy Policy</p>
-          <h1>How we handle audio, transcripts, and support data.</h1>
-          <p className={styles.intro}>
-            This policy explains what we collect, why we collect it, and the
-            choices you have when using Speech Transcriber.
-          </p>
-          <p className={styles.meta}>Effective date: {effectiveDate}</p>
+          <h2>Privacy Policy</h2>
+          <p className={styles.meta}>Last updated: June 2026</p>
         </header>
 
+        <p className={styles.lead}>
+          AI Transcriber (&ldquo;the App&rdquo;) respects your privacy.
+        </p>
+
         <section className={styles.section}>
-          <h2>Information we collect</h2>
+          <h2>Information We Collect</h2>
+          <p>The App may collect:</p>
+          <ul>
+            <li>Audio recordings provided by the user</li>
+            <li>Speech-to-text transcriptions</li>
+            <li>Device information required for app functionality</li>
+            <li>Usage analytics (if enabled)</li>
+          </ul>
+        </section>
+
+        <section className={styles.section}>
+          <h2>How We Use Information</h2>
+          <p>We use collected information to:</p>
+          <ul>
+            <li>Convert speech to text</li>
+            <li>Improve transcription accuracy</li>
+            <li>Provide app features and support</li>
+          </ul>
+        </section>
+
+        <section className={styles.section}>
+          <h2>Data Storage</h2>
           <p>
-            We collect the information you provide directly, including audio or
-            video files you upload, microphone recordings you start in the app,
-            transcripts generated from those files, and messages you send to us
-            for support or account help.
-          </p>
-          <p>
-            We may also collect basic device and usage data, such as browser
-            type, timestamps, error logs, and page interactions, to keep the
-            service reliable and secure.
+            Audio recordings and transcriptions may be stored locally on your
+            device and/or on secure cloud servers, depending on the features you
+            use.
           </p>
         </section>
 
         <section className={styles.section}>
-          <h2>How we use your information</h2>
+          <h2>Third-Party Services</h2>
+          <p>The App may use third-party services such as:</p>
+          <ul>
+            <li>OpenAI</li>
+            <li>Google Play Services</li>
+            <li>Google Analytics</li>
+          </ul>
           <p>
-            We use audio and transcript data to provide transcription features,
-            display your results, improve error handling, and maintain the
-            service. We may also use this information to respond to requests,
-            troubleshoot issues, and prevent abuse.
-          </p>
-          <p>
-            To generate transcripts, we may send your audio and related metadata
-            to third-party service providers that process the content on our
-            behalf, including AI and cloud infrastructure vendors.
-          </p>
-        </section>
-
-        <section className={styles.section}>
-          <h2>How we share information</h2>
-          <p>
-            We do not sell personal information. We only share information with
-            trusted service providers that help us run the app, when required by
-            law, or when needed to protect our users, our service, or our rights.
+            These services may process data according to their own privacy
+            policies.
           </p>
         </section>
 
         <section className={styles.section}>
-          <h2>Retention</h2>
+          <h2>Data Sharing</h2>
+          <p>We do not sell personal information.</p>
           <p>
-            We keep audio, transcripts, and related logs only as long as needed
-            to provide the service, meet legal or operational requirements, or
-            resolve disputes. When data is no longer needed, we delete it or
-            anonymize it where practical.
-          </p>
-        </section>
-
-        <section className={styles.section}>
-          <h2>Your choices</h2>
-          <p>
-            Depending on your location, you may have rights to access, correct,
-            export, or delete your personal information. You can also limit
-            certain processing by contacting us using the details below.
-          </p>
-        </section>
-
-        <section className={styles.section}>
-          <h2>Children&apos;s privacy</h2>
-          <p>
-            Speech Transcriber is not intended for children under 13, and we do
-            not knowingly collect personal information from children under 13.
-            If you believe a child has provided us information, contact us so we
-            can take appropriate action.
+            We may share information only when necessary to provide app
+            functionality or comply with legal obligations.
           </p>
         </section>
 
         <section className={styles.section}>
           <h2>Security</h2>
           <p>
-            We use reasonable administrative, technical, and organizational
-            safeguards to protect data. No method of transmission or storage is
-            completely secure, so we cannot guarantee absolute security.
+            We take reasonable measures to protect your information from
+            unauthorized access.
+          </p>
+        </section>
+
+        <section className={styles.section}>
+          <h2>Children&apos;s Privacy</h2>
+          <p>
+            The App is not intended for children under 13 years of age.
           </p>
         </section>
 
         <section className={styles.section}>
           <h2>Contact</h2>
+          <p>For questions regarding this Privacy Policy:</p>
           <p>
-            If you have questions about this policy or want to exercise your
-            privacy rights, contact us at <a href="mailto:krasnoff.kobi@gmail.com">krasnoff.kobi@gmail.com</a>.
+            Email:{" "}
+            <a href="mailto:krasnoff.kobi@gmail.com">
+              krasnoff.kobi@gmail.com
+            </a>
+          </p>
+        </section>
+
+        <section className={styles.section}>
+          <h2>Changes</h2>
+          <p>
+            We may update this Privacy Policy from time to time. Continued use
+            of the App constitutes acceptance of any changes.
           </p>
         </section>
       </article>
