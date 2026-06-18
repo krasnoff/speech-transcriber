@@ -1,0 +1,129 @@
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  background:
+    radial-gradient(circle at top left, rgba(28, 83, 194, 0.14), transparent 30%),
+    radial-gradient(circle at top right, rgba(17, 24, 39, 0.08), transparent 25%),
+    linear-gradient(180deg, #f7f8fc 0%, #eef2f8 100%);
+  color: #0f172a;
+  font-family: var(--font-geist-sans);
+}
+
+.backLinkWrap {
+  max-width: 920px;
+  margin: 0 auto 20px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(14px);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.backLink:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 23, 42, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.card {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 40px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.hero {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  margin-bottom: 28px;
+}
+
+.kicker {
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  max-width: 16ch;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+}
+
+.intro {
+  max-width: 68ch;
+  color: rgba(15, 23, 42, 0.78);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.meta {
+  color: rgba(15, 23, 42, 0.6);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+}
+
+.section + .section {
+  margin-top: 26px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.section h2 {
+  font-size: 1.2rem;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.section p {
+  max-width: 74ch;
+  color: rgba(15, 23, 42, 0.74);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 20px;
+  }
+
+  .card {
+    padding: 24px;
+    border-radius: 22px;
+  }
+
+  .hero h1 {
+    max-width: none;
+  }
+}
