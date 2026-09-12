@@ -1,10 +1,8 @@
-import { createOpenAI } from "@ai-sdk/openai";
-import { systemPrompt } from "@repo/common/lib/system_prompt";
-import { generateObject } from "ai";
 import dotenv from "dotenv";
 import express from "express";
 import path from "node:path";
-import { z } from "zod";
+import { WebSocketServer, WebSocket } from "ws";
+import { createServer } from "http";
 
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -12,73 +10,140 @@ dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env.local") });
 
 const app = express();
-const port = Number(process.env.PORT) || 4000;
+const server = createServer(app);
 
-type TranscribeRequestBody = {
-  transcript?: string;
-};
-
-const transcriptionSummarySchema = z.object({
-  overallSummary: z.string(),
-  mainInsights: z.string(),
-  toDoList: z.array(
-    z.object({
-      teamMemberName: z.string(),
-      todo: z.array(
-        z.object({
-          item: z.string(),
-        })
-      ),
-    })
-  ),
+const wss = new WebSocketServer({
+  server,
+  path: "/transcription",
 });
 
-app.use(express.json());
-
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
-app.get("/", (_req, res) => {
+app.get("/", (_, res) => {
   res.json({
-    name: "speech-transcriber-api",
-    message: "API is running",
+    status: "ok",
   });
 });
 
-app.post("/api/transcribe", async (req, res) => {
-    try {
-    if (!process.env.OLLAMA_API_KEY) {
-      return res.status(500).json({
-        error: "Missing server env: OLLAMA_API_KEY",
-      });
+wss.on("connection", (clientSocket) => {
+  console.log("React Native client connected");
+
+  const openaiSocket = new WebSocket(
+    "wss://api.openai.com/v1/realtime?model=gpt-realtime-whisper",
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+    }
+  );
+
+  openaiSocket.on("open", () => {
+    console.log("Connected to OpenAI Realtime API");
+
+    openaiSocket.send(
+      JSON.stringify({
+        type: "session.update",
+        session: {
+          input_audio_format: "pcm16",
+
+          input_audio_transcription: {
+            model: "gpt-realtime-whisper",
+          },
+
+          turn_detection: {
+            type: "server_vad",
+          },
+        },
+      })
+    );
+  });
+
+  clientSocket.on("message", (message, isBinary) => {
+    if (openaiSocket.readyState !== WebSocket.OPEN) {
+      return;
     }
 
-        const transcript = req.body?.transcript?.trim();
+    /*
+     * React Native sends raw PCM16 audio bytes.
+     *
+     * OpenAI expects input_audio_buffer.append
+     * containing Base64 encoded audio.
+     */
 
-        if (!transcript) {
-            return res.status(400).json({ error: "Missing required field: transcript" });
-        }
+    const audioBase64 = Buffer.from(message as Buffer).toString("base64");
 
-        const ollama = createOpenAI({
-            baseURL: process.env.OLLAMA_BASE_URL,
-          apiKey: process.env.OLLAMA_API_KEY,
-        });
+    openaiSocket.send(
+      JSON.stringify({
+        type: "input_audio_buffer.append",
+        audio: audioBase64,
+      })
+    );
+  });
 
-        const result = await generateObject({
-            model: ollama(process.env.OLLAMA_MODEL ?? "gpt-oss:120b-cloud"),
-            system: systemPrompt,
-            prompt: transcript,
-            schema: transcriptionSummarySchema,
-        });
+  openaiSocket.on("message", (data: any) => {
+    const event = JSON.parse(data.toString());
 
-        return res.json(result.object);
-    } catch (error) {
-        console.error("Transcribe request failed:", error);
-        return res.status(500).json({ error: "Chat request failed." });
+    console.log("OpenAI:", event.type);
+
+    /*
+     * Partial transcription
+     */
+    if (
+      event.type ===
+      "conversation.item.input_audio_transcription.delta"
+    ) {
+      clientSocket.send(
+        JSON.stringify({
+          type: "transcript.delta",
+          text: event.delta,
+        })
+      );
     }
+
+    /*
+     * Completed transcription segment
+     */
+    if (
+      event.type ===
+      "conversation.item.input_audio_transcription.completed"
+    ) {
+      clientSocket.send(
+        JSON.stringify({
+          type: "transcript.completed",
+          text: event.transcript,
+        })
+      );
+    }
+
+    if (event.type === "error") {
+      console.error("OpenAI error:", event);
+
+      clientSocket.send(
+        JSON.stringify({
+          type: "error",
+          error: event.error,
+        })
+      );
+    }
+  });
+
+  clientSocket.on("close", () => {
+    console.log("React Native disconnected");
+
+    if (openaiSocket.readyState === WebSocket.OPEN) {
+      openaiSocket.close();
+    }
+  });
+
+  openaiSocket.on("close", () => {
+    console.log("OpenAI connection closed");
+  });
+
+  openaiSocket.on("error", (error) => {
+    console.error("OpenAI WebSocket error:", error);
+  });
 });
 
-app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+const PORT = Number(process.env.PORT ?? 3000);
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

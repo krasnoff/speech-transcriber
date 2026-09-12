@@ -15,12 +15,14 @@
     "ai": "^6.0.197",
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
+    "ws": "^8.21.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.3",
+    "@types/ws": "^8.18.1",
     "tsx": "^4.20.5",
     "typescript": "5.9.2"
   }
