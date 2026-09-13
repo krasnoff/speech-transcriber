@@ -12,6 +12,9 @@ dotenv.config({ path: path.resolve(process.cwd(), "../../.env.local") });
 const app = express();
 const server = createServer(app);
 
+const REALTIME_MODEL = "gpt-realtime";
+const TRANSCRIPTION_MODEL = "gpt-realtime-whisper";
+
 const wss = new WebSocketServer({
   server,
   path: "/transcription",
@@ -27,7 +30,7 @@ wss.on("connection", (clientSocket) => {
   console.log("React Native client connected");
 
   const openaiSocket = new WebSocket(
-    "wss://api.openai.com/v1/realtime?model=gpt-realtime-whisper",
+    `wss://api.openai.com/v1/realtime?model=${REALTIME_MODEL}`,
     {
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -42,14 +45,20 @@ wss.on("connection", (clientSocket) => {
       JSON.stringify({
         type: "session.update",
         session: {
-          input_audio_format: "pcm16",
-
-          input_audio_transcription: {
-            model: "gpt-realtime-whisper",
-          },
-
-          turn_detection: {
-            type: "server_vad",
+          type: "realtime",
+          audio: {
+            input: {
+              format: {
+                type: "audio/pcm",
+                rate: 24000,
+              },
+              transcription: {
+                model: TRANSCRIPTION_MODEL,
+              },
+              turn_detection: {
+                type: "server_vad",
+              },
+            },
           },
         },
       })

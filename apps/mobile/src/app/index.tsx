@@ -11,9 +11,10 @@ import { requestRequiredPermissions } from "@/lib/permissions";
 import { useRouter } from "expo-router";
 
 import {
-  ExpoSpeechRecognitionModule,
-  useSpeechRecognitionEvent,
-} from "expo-speech-recognition";
+  requestRecordingPermissionsAsync,
+  useAudioStream,
+} from "expo-audio";
+
 import { commonStyles } from "@/design-system/common-styles";
 
 export default function Index() {
@@ -22,12 +23,10 @@ export default function Index() {
   const [isMicPushed, setIsMicPushed] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   
-  const [recognizing, setRecognizing] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
 
   const initialText = "זהו טקסט לדוגמה שמדגים את התמלול החי של ההקלטה. הטקסט הזה יכול להיות ארוך יותר ולהמשיך להתעדכן בזמן אמת ככל שההקלטה מתקדמת.\n\nהמערכת מזהה את הדיבור ומציגה אותו על המסך, כך שהמשתמש יכול לראות את התמלול מתרחש בזמן אמת. זה יכול להיות שימושי במיוחד עבור אנשים עם לקויות שמיעה או במצבים שבהם חשוב לעקוב אחרי התוכן המדובר.\n\nהטקסט הזה הוא רק דוגמה, ובמציאות הוא יהיה דינמי ויתעדכן כל הזמן עם ההתקדמות של ההקלטה והתמלול החי.";
-  const [transcript, setTranscript] = useState(initialText);
-
+  
   // For testing purposes, we can simulate recording time increase every second when the mic is pushed.
   const increaseRecordingTime = () => {
     setRecordingTime((prev) => prev + 1);
@@ -52,6 +51,61 @@ export default function Index() {
   const scrollTranscriptToBottom = () => {
     transcriptScrollRef.current?.scrollToEnd({ animated: true });
   };
+
+  const socketRef = useRef<WebSocket | null>(null);
+  const [transcript, setTranscript] = useState("");
+
+  // sends stream to the server and receives the transcribed text in real-time
+  const { stream, isStreaming } = useAudioStream({
+    sampleRate: 24000,
+    channels: 1,
+    encoding: "int16",
+
+    onBuffer(buffer) {
+      const socket = socketRef.current;
+
+      if (
+        socket &&
+        socket.readyState === WebSocket.OPEN
+      ) {
+        // buffer.data is raw PCM16 audio
+        socket.send(buffer.data);
+      }
+    },
+  });
+
+  // Handle incoming messages from the WebSocket server
+  useEffect(() => {
+    const socket = new WebSocket(
+      `ws://${process.env.EXPO_PUBLIC_BASE_URL}/transcription`
+    );
+
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("Connected to Node server");
+    };
+
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      if (message.type === "transcript.delta") {
+        setTranscript((current) => current + message.text);
+      }
+
+      if (message.type === "transcript.completed") {
+        console.log("Completed:", message.text);
+      }
+    };
+
+    socket.onerror = (event) => {
+      console.error("WebSocket error:", event);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   // Scroll transcript to bottom when new text is added
   useEffect(() => {
@@ -94,7 +148,6 @@ export default function Index() {
 
       setTranscript("");
       setInterimTranscript("");
-
       startListening();
     };
 
@@ -119,65 +172,27 @@ export default function Index() {
     };
   }, [isMicPushed, isPaused]);
 
-  // Handle speech recognition events
-  useSpeechRecognitionEvent("start", () => {
-    setRecognizing(true);
-  });
-
-  // When recognition ends, we want to reset recognizing state and clear interim transcript
-  useSpeechRecognitionEvent("end", () => {
-    setRecognizing(false);
-    setInterimTranscript("");
-
-    reStartListening();
-  });
-
-  // As results come in, we want to update the interim transcript and append to the final transcript when results are finalized
-  useSpeechRecognitionEvent("result", (event) => {
-    const text = event.results
-      .map((result) => result.transcript)
-      .join("");
-
-    if (event.isFinal) {
-      // console.log("Final transcript:", text);
-      setTranscript((prev) => prev + "\n" + text);
-      setInterimTranscript("");
-    } else {
-      //console.log("Interim transcript:", text);
-      setInterimTranscript(text);
-    }
-  });
-
-  // Handle errors by showing an alert and resetting recognizing state
-  useSpeechRecognitionEvent("error", (event) => {
-    // console.log("Speech recognition error:", event);
-    setRecognizing(false);
-    Alert.alert("Speech recognition error", event.message);
-
-    reStartListening();
-  });
-
-  const reStartListening = () => {
-    if (isMicPushed && !isPaused) {
-      setTimeout(() => {
-        startListening();
-      }, 300);
-    }
-  }
+  
 
   // Start listening with specified options
   const startListening = async () => {
-    ExpoSpeechRecognitionModule.start({
-      lang: "he-IL", // Hebrew
-      interimResults: true,
-      continuous: true,
-      maxAlternatives: 1,
-    });
+    const permission =
+      await requestRecordingPermissionsAsync();
+
+    if (!permission.granted) {
+      console.error("Microphone permission denied");
+      return;
+    }
+
+    await stream.start();
+
+    console.log("Microphone started");
   };
 
   // Stop listening
   const stopListening = () => {
-    ExpoSpeechRecognitionModule.stop();
+    stream.stop();
+    console.log("Microphone stopped");
   };
 
   // Clear transcript and reset state
