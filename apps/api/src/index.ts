@@ -14,6 +14,29 @@ const server = createServer(app);
 
 const REALTIME_MODEL = "gpt-realtime";
 const TRANSCRIPTION_MODEL = "gpt-realtime-whisper";
+const SUPPORTED_TRANSCRIPTION_LANGUAGES = ["he", "en"] as const;
+
+type TranscriptionLanguage = (typeof SUPPORTED_TRANSCRIPTION_LANGUAGES)[number];
+
+const getTranscriptionLanguage = (): TranscriptionLanguage => {
+  const language = process.env.TRANSCRIPTION_LANGUAGE ?? "he";
+
+  if (
+    !SUPPORTED_TRANSCRIPTION_LANGUAGES.includes(
+      language as TranscriptionLanguage,
+    )
+  ) {
+    throw new Error(
+      `TRANSCRIPTION_LANGUAGE must be one of: ${SUPPORTED_TRANSCRIPTION_LANGUAGES.join(
+        ", ",
+      )}`,
+    );
+  }
+
+  return language as TranscriptionLanguage;
+};
+
+const TRANSCRIPTION_LANGUAGE = getTranscriptionLanguage();
 
 const wss = new WebSocketServer({
   server,
@@ -35,7 +58,7 @@ wss.on("connection", (clientSocket) => {
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
-    }
+    },
   );
 
   openaiSocket.on("open", () => {
@@ -54,6 +77,7 @@ wss.on("connection", (clientSocket) => {
               },
               transcription: {
                 model: TRANSCRIPTION_MODEL,
+                language: TRANSCRIPTION_LANGUAGE,
               },
               turn_detection: {
                 type: "server_vad",
@@ -61,7 +85,7 @@ wss.on("connection", (clientSocket) => {
             },
           },
         },
-      })
+      }),
     );
   });
 
@@ -83,7 +107,7 @@ wss.on("connection", (clientSocket) => {
       JSON.stringify({
         type: "input_audio_buffer.append",
         audio: audioBase64,
-      })
+      }),
     );
   });
 
@@ -95,15 +119,12 @@ wss.on("connection", (clientSocket) => {
     /*
      * Partial transcription
      */
-    if (
-      event.type ===
-      "conversation.item.input_audio_transcription.delta"
-    ) {
+    if (event.type === "conversation.item.input_audio_transcription.delta") {
       clientSocket.send(
         JSON.stringify({
           type: "transcript.delta",
           text: event.delta,
-        })
+        }),
       );
     }
 
@@ -111,14 +132,13 @@ wss.on("connection", (clientSocket) => {
      * Completed transcription segment
      */
     if (
-      event.type ===
-      "conversation.item.input_audio_transcription.completed"
+      event.type === "conversation.item.input_audio_transcription.completed"
     ) {
       clientSocket.send(
         JSON.stringify({
           type: "transcript.completed",
           text: event.transcript,
-        })
+        }),
       );
     }
 
@@ -129,7 +149,7 @@ wss.on("connection", (clientSocket) => {
         JSON.stringify({
           type: "error",
           error: event.error,
-        })
+        }),
       );
     }
   });
