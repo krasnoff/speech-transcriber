@@ -94,6 +94,7 @@ export default function Index() {
       }
 
       if (message.type === "transcript.completed") {
+        setTranscript((current) => current + '\n');
         console.log("Completed:", message.text);
       }
     };
