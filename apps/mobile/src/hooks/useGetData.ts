@@ -23,7 +23,11 @@ const useGetData = (url: string, method: Methods = Methods.GET) => {
       setLoading(true);
       setError(null);
       try {
-        const fullUrl = process.env.EXPO_PUBLIC_BASE_URL + url;
+        const fullUrl =
+          (process.env.EXPO_PUBLIC_API_URL_PREFIX ?? "") +
+          (process.env.EXPO_PUBLIC_BASE_URL ?? "") +
+          url;
+        console.log(`Fetching data from ${fullUrl} with method ${method}`);
 
         const response = await axios({
           method,

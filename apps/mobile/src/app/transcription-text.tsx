@@ -13,7 +13,7 @@ import { Methods } from "@/enums/methods.enums";
 
 export default function TranscriptionTextPage() {
     const router = useRouter();
-    const { data, error, loading, fetchData, cancelRequest, setLoading } = useGetData('transcribe', Methods.POST);
+    const { data, error, loading, fetchData, cancelRequest, setLoading } = useGetData('/api/transcribe', Methods.POST);
 
     const params = useLocalSearchParams<{ transcript?: string | string[] }>();
     const transcript = Array.isArray(params.transcript)
