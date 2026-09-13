@@ -13,6 +13,7 @@
     "@ai-sdk/openai": "^3.0.68",
     "@repo/common": "workspace:*",
     "ai": "^6.0.197",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
     "ws": "^8.21.3",

@@ -4,6 +4,8 @@ import path from "node:path";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer } from "http";
 
+import transcribeController from "./controllers/transcribe.controller.js";
+
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
@@ -43,11 +45,14 @@ const wss = new WebSocketServer({
   path: "/transcription",
 });
 
-app.get("/", (_, res) => {
-  res.json({
-    status: "ok",
-  });
+app.use((_request, response, next) => {
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  next();
 });
+app.use(express.json());
+app.use("/api", transcribeController);
 
 wss.on("connection", (clientSocket) => {
   console.log("React Native client connected");
