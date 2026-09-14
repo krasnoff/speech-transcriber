@@ -77,7 +77,7 @@ export default function Index() {
   // Handle incoming messages from the WebSocket server
   useEffect(() => {
     const socket = new WebSocket(
-      `ws://${process.env.EXPO_PUBLIC_BASE_URL}/transcription`
+      `${process.env.EXPO_PUBLIC_API_URL_PREFIX_WEBSOCKET}${process.env.EXPO_PUBLIC_BASE_URL}/transcription`
     );
 
     socketRef.current = socket;
@@ -96,6 +96,10 @@ export default function Index() {
       if (message.type === "transcript.completed") {
         setTranscript((current) => current + '\n');
         console.log("Completed:", message.text);
+      }
+
+      if (message.type === "error") {
+        console.error("Transcription error:", message.error);
       }
     };
 
@@ -191,8 +195,14 @@ export default function Index() {
   };
 
   // Stop listening
-  const stopListening = () => {
-    stream.stop();
+  const stopListening = async () => {
+    await stream.stop();
+
+    const socket = socketRef.current;
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "input_audio_buffer.commit" }));
+    }
+
     console.log("Microphone stopped");
   };
 

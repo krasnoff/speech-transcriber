@@ -14,9 +14,8 @@ dotenv.config({ path: path.resolve(process.cwd(), "../../.env.local") });
 const app = express();
 const server = createServer(app);
 
-const REALTIME_MODEL = "gpt-realtime";
-const TRANSCRIPTION_MODEL = "gpt-realtime-whisper";
-const SUPPORTED_TRANSCRIPTION_LANGUAGES = ["he", "en"] as const;
+const TRANSCRIPTION_MODEL = "gpt-live-transcribe";
+const SUPPORTED_TRANSCRIPTION_LANGUAGES = ["he"] as const;
 
 type TranscriptionLanguage = (typeof SUPPORTED_TRANSCRIPTION_LANGUAGES)[number];
 
@@ -58,7 +57,7 @@ wss.on("connection", (clientSocket) => {
   console.log("React Native client connected");
 
   const openaiSocket = new WebSocket(
-    `wss://api.openai.com/v1/realtime?model=${REALTIME_MODEL}`,
+    "wss://api.openai.com/v1/realtime?intent=transcription",
     {
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -73,7 +72,7 @@ wss.on("connection", (clientSocket) => {
       JSON.stringify({
         type: "session.update",
         session: {
-          type: "realtime",
+          type: "transcription",
           audio: {
             input: {
               format: {
@@ -82,11 +81,11 @@ wss.on("connection", (clientSocket) => {
               },
               transcription: {
                 model: TRANSCRIPTION_MODEL,
-                language: TRANSCRIPTION_LANGUAGE,
+                languages: [TRANSCRIPTION_LANGUAGE],
+                prompt:
+                  "השמע הוא בעברית. יש לתמלל את הדיבור בעברית ולשמור מונחים טכניים ושמות כפי שנאמרו.",
               },
-              turn_detection: {
-                type: "server_vad",
-              },
+              turn_detection: null,
             },
           },
         },
@@ -94,8 +93,27 @@ wss.on("connection", (clientSocket) => {
     );
   });
 
+  let hasUncommittedAudio = false;
+
   clientSocket.on("message", (message, isBinary) => {
     if (openaiSocket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    if (!isBinary) {
+      try {
+        const event = JSON.parse(message.toString());
+
+        if (event.type === "input_audio_buffer.commit" && hasUncommittedAudio) {
+          openaiSocket.send(
+            JSON.stringify({ type: "input_audio_buffer.commit" }),
+          );
+          hasUncommittedAudio = false;
+        }
+      } catch {
+        console.warn("Ignoring invalid client control message");
+      }
+
       return;
     }
 
@@ -107,6 +125,7 @@ wss.on("connection", (clientSocket) => {
      */
 
     const audioBase64 = Buffer.from(message as Buffer).toString("base64");
+    hasUncommittedAudio = true;
 
     openaiSocket.send(
       JSON.stringify({
