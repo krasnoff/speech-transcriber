@@ -39,13 +39,12 @@ router.post("/transcribe", async (request: Request, response: Response, next: Ne
             });
         }
 
-        const ollama = createOpenAI({
-            baseURL: process.env.OLLAMA_BASE_URL,
-            apiKey: process.env.OLLAMA_API_KEY ?? "",
+        const openai = createOpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
         });
 
         const result = await generateObject({
-            model: ollama(process.env.OLLAMA_MODEL ?? "gpt-oss:120b-cloud"),
+            model: openai("gpt-6-astra"),
             system: systemPrompt,
             prompt: transcript,
             schema: transcriptionSummarySchema,
